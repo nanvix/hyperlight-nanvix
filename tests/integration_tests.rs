@@ -100,8 +100,7 @@ async fn test_nonexistent_file() {
 async fn test_runtime_config_customization() {
     let config = RuntimeConfig::new()
         .with_log_directory("/tmp/hyperlight-test-log")
-        .with_tmp_directory("/tmp/hyperlight-test-tmp")
-        .with_toolchain_directory("/tmp/hyperlight-test-toolchain");
+        .with_tmp_directory("/tmp/hyperlight-test-tmp");
 
     let mut sandbox = Sandbox::new(config).expect("Failed to create sandbox with custom config");
 

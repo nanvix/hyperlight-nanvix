@@ -31,12 +31,10 @@ mod unit_tests {
     fn test_runtime_config_builder() {
         let config = RuntimeConfig::new()
             .with_log_directory("/custom/log")
-            .with_tmp_directory("/custom/tmp")
-            .with_toolchain_directory("/custom/toolchain");
+            .with_tmp_directory("/custom/tmp");
 
         assert_eq!(config.log_directory, "/custom/log");
         assert_eq!(config.tmp_directory, "/custom/tmp");
-        assert_eq!(config.toolchain_binary_directory, "/custom/toolchain");
         assert!(config.syscall_table.is_none());
     }
 

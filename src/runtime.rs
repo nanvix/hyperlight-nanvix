@@ -51,8 +51,6 @@ pub struct RuntimeConfig {
     pub log_directory: String,
     /// Directory for temporary files
     pub tmp_directory: String,
-    /// Directory containing toolchain binaries
-    pub toolchain_binary_directory: String,
 }
 
 impl std::fmt::Debug for RuntimeConfig {
@@ -64,10 +62,6 @@ impl std::fmt::Debug for RuntimeConfig {
             )
             .field("log_directory", &self.log_directory)
             .field("tmp_directory", &self.tmp_directory)
-            .field(
-                "toolchain_binary_directory",
-                &self.toolchain_binary_directory,
-            )
             .finish()
     }
 }
@@ -78,7 +72,6 @@ impl Default for RuntimeConfig {
             syscall_table: None,
             log_directory: "/tmp/hyperlight-nanvix".to_string(),
             tmp_directory: "/tmp/hyperlight-nanvix".to_string(),
-            toolchain_binary_directory: "/tmp/hyperlight-nanvix/toolchain".to_string(),
         }
     }
 }
@@ -103,11 +96,6 @@ impl RuntimeConfig {
 
     pub fn with_tmp_directory<S: Into<String>>(mut self, dir: S) -> Self {
         self.tmp_directory = dir.into();
-        self
-    }
-
-    pub fn with_toolchain_directory<S: Into<String>>(mut self, dir: S) -> Self {
-        self.toolchain_binary_directory = dir.into();
         self
     }
 }
@@ -251,7 +239,7 @@ impl Runtime {
             None,
             &kernel_path,
             syscall_table,
-            &self.config.toolchain_binary_directory,
+            "/tmp/hyperlight-nanvix/toolchain",
             &self.config.log_directory,
             false,
             "/tmp/hyperlight-nanvix/snapshot.bin",
@@ -261,22 +249,14 @@ impl Runtime {
         // Create terminal
         let mut terminal: Terminal<()> = Terminal::new(sandbox_cache_config);
 
-        // Prepare execution paths
-        let (effective_binary_path, effective_script_args) =
-            if matches!(workload_type, WorkloadType::Python) {
-                let script_args = format!("-S -I {}", absolute_workload_path);
-                ("bin/python3".to_string(), script_args)
-            } else {
-                let (script_args, _) = self.prepare_script_args(workload_type, workload_path)?;
-                (binary_path.clone(), script_args)
-            };
-
-        // Prepare execution metadata
-        let script_name = workload_path
-            .file_name()
-            .and_then(|name| name.to_str())
-            .ok_or_else(|| anyhow::anyhow!("Invalid workload path: {:?}", workload_path))?
-            .to_string();
+        // Prepare execution paths and metadata
+        let (script_args, script_name) = self.prepare_script_args(workload_type, Path::new(&absolute_workload_path))?;
+        let effective_binary_path = if matches!(workload_type, WorkloadType::Python) {
+            "bin/python3".to_string()
+        } else {
+            binary_path.clone()
+        };
+        let effective_script_args = script_args;
 
         let unique_app_name = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)?
