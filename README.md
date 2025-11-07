@@ -215,3 +215,12 @@ cargo run -- --setup-registry
 ```bash
 rm -rf /tmp/hyperlight-nanvix/*
 ```
+
+## Usage Statement
+
+This project is a prototype. As such, we provide no guarantees that it will work and you are
+assuming any risks with using the code. We welcome comments and feedback. Please send any questions
+or comments to any of the following maintainers of the project.
+
+By sending feedback, you are consenting that it may be used in the further development of this
+project.
